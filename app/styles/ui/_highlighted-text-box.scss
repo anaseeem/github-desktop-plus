@@ -1,0 +1,39 @@
+.highlighted-text-box {
+  position: relative;
+  flex-grow: 1;
+  display: flex;
+
+  .highlighted-text-box-backdrop {
+    position: absolute;
+    top: 1px;
+    bottom: 0;
+    left: calc(18px + var(--spacing-half) + 1px);
+    right: var(--spacing-half);
+    font-size: var(--font-size);
+    font-family: var(--font-family-sans-serif);
+    line-height: var(--text-field-height);
+    white-space: pre;
+    overflow: hidden;
+    pointer-events: none;
+
+    // .token {
+    //    color: var(--box-selected-active-background-color);
+    // }
+    .token-value {
+      color: var(--box-selected-active-background-color);
+    }
+  }
+
+  &.with-clear-button .highlighted-text-box-backdrop {
+    // right: var(--text-field-height);
+    right: calc(16px + var(--spacing-half) + 1px);
+  }
+
+  input {
+    position: relative;
+    z-index: 1;
+    color: transparent;
+    caret-color: var(--text-color);
+    background: transparent;
+  }
+}

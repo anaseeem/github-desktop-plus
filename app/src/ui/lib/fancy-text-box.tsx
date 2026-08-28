@@ -3,7 +3,7 @@ import { Octicon, OcticonSymbol } from '../octicons'
 import { TextBox, ITextBoxProps } from './text-box'
 import classNames from 'classnames'
 
-interface IFancyTextBoxProps extends ITextBoxProps {
+export interface IFancyTextBoxProps extends ITextBoxProps {
   /** Icon to render */
   readonly symbol: OcticonSymbol
 

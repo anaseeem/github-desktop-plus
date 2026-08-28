@@ -185,6 +185,11 @@ export class TextBox extends React.Component<ITextBoxProps, ITextBoxState> {
     }
   }
 
+  /** Provides access to the underlying input element. */
+  public getInputElement(): HTMLInputElement | null {
+    return this.inputElement
+  }
+
   /** Determines if the contained text input element is currently focused. */
   public get isFocused() {
     return (
