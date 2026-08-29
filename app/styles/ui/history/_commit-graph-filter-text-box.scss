@@ -20,12 +20,18 @@
     //    color: var(--box-selected-active-background-color);
     // }
     .token-value {
-      color: var(--focus-color);
-      background-color: var(--accent-color);
+      color: var(--md-accent-fg-color);
+      background-color: var(--co-author-tag-background-color);
+      border-radius: var(--outlined-border-radius);
     }
     .token-value-invalid {
-      color: var(--error-color);
+      color: var(--file-warning-color);
+      background-color: var(--file-warning-background-color);
+      border-radius: var(--outlined-border-radius);
     }
+    // .token-value-pending is intentionally unstyled: a token the user is
+    // still typing renders in the default text color until it is committed
+    // (delimited by whitespace).
   }
 
   &.with-clear-button .commitGraph-filter-text-box-backdrop {

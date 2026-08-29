@@ -72,7 +72,6 @@ export class CommitGraphFilterTextBox extends React.Component<
           value={this.state.value}
           onValueChanged={this.onValueChanged}
           onEnterPressed={this.onEnterPressed}
-          onSearchCleared={this.onSearchCleared}
           onRef={this.onTextBoxRef}
         />
       </div>
@@ -91,10 +90,6 @@ export class CommitGraphFilterTextBox extends React.Component<
 
   private onEnterPressed = (text: string) => {
     this.submitSearch(text)
-  }
-
-  private onSearchCleared = () => {
-    this.onValueChanged('')
   }
 
   private submitSearch = (text: string) => {
@@ -136,29 +131,32 @@ export class CommitGraphFilterTextBox extends React.Component<
 }
 
 function renderSegments(text: string, optionSet: ReadonlySet<string>) {
-  return text
-    .split(/(\s+)/)
-    .filter(s => s.length > 0)
-    .map((segment, i) => {
-      const match = /^author:(\S+)$/.exec(segment)
+  const segments = text.split(/(\s+)/).filter(s => s.length > 0)
 
-      if (match === null) {
-        return <span key={i}>{segment}</span>
-      }
+  return segments.map((segment, i) => {
+    const match = /^author:(\S+)$/.exec(segment)
 
-      const validEmail = optionSet.has(match[1].toLowerCase())
+    if (match === null) {
+      return <span key={i}>{segment}</span>
+    }
 
-      return (
-        <span key={i}>
-          <span className="token">author:</span>
-          <span
-            className={`${validEmail ? 'token-value' : 'token-value-invalid'}`}
-          >
-            {match[1]}
-          </span>
-        </span>
-      )
-    })
+    const validEmail = optionSet.has(match[1].toLowerCase())
+
+    const isUserTyping = i < segments.length - 1
+
+    const valueClassName = validEmail
+      ? 'token-value'
+      : isUserTyping
+      ? 'token-value-invalid'
+      : 'token-value-pending'
+
+    return (
+      <span key={i}>
+        <span className="token">author:</span>
+        <span className={valueClassName}>{match[1]}</span>
+      </span>
+    )
+  })
 }
 
 function parseSearchQuery(
