@@ -72,6 +72,7 @@ export class CommitGraphFilterTextBox extends React.Component<
           value={this.state.value}
           onValueChanged={this.onValueChanged}
           onEnterPressed={this.onEnterPressed}
+          onSearchCleared={this.onSearchCleared}
           onRef={this.onTextBoxRef}
         />
       </div>
@@ -82,9 +83,21 @@ export class CommitGraphFilterTextBox extends React.Component<
     this.setState({
       value: text,
     })
+
+    if (text === '') {
+      this.submitSearch('')
+    }
   }
 
   private onEnterPressed = (text: string) => {
+    this.submitSearch(text)
+  }
+
+  private onSearchCleared = () => {
+    this.onValueChanged('')
+  }
+
+  private submitSearch = (text: string) => {
     const { query, validEmailSet } = parseSearchQuery(text, this.authorEmailSet)
 
     this.props.onSearchSubmitted(query, validEmailSet)

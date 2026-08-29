@@ -33,7 +33,7 @@
     right: calc(16px + var(--spacing-half) + 1px);
   }
 
-  input {
+  .text-box-component input {
     position: relative;
     z-index: 1;
     color: transparent;
