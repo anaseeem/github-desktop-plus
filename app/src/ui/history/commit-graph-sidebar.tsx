@@ -26,7 +26,6 @@ import { Repository } from '../../models/repository'
 import { defaultErrorHandler, Dispatcher } from '../dispatcher'
 import { Button } from '../lib/button'
 import { Checkbox, CheckboxValue } from '../lib/checkbox'
-import { HighlightedTextBox } from '../lib/highlighted-text-box'
 import { KeyboardInsertionData } from '../lib/list'
 import { ThrottledScheduler } from '../lib/throttled-scheduler'
 import { startTimer } from '../lib/timing'
@@ -35,6 +34,7 @@ import * as octicons from '../octicons/octicons.generated'
 import { Resizable } from '../resizable'
 import { CommitGraphCommitListItem } from './commit-graph-commit-list-item'
 import { CommitGraphFilterButton } from './commit-graph-filter-button'
+import { CommitGraphFilterTextBox } from './commit-graph-filter-text-box'
 import {
   commitGraph_buildRows,
   commitGraph_getColor,
@@ -652,7 +652,7 @@ export class CommitGraphSidebar extends React.Component<
                   onActiveAuthorEmailsChange={this.onActiveAuthorEmailsChange}
                 />
               </span>
-              <HighlightedTextBox
+              <CommitGraphFilterTextBox
                 ariaLabel="Commit filter"
                 type="search"
                 symbol={

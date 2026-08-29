@@ -1,9 +1,9 @@
-.highlighted-text-box {
+.commitGraph-filter-text-box {
   position: relative;
   flex-grow: 1;
   display: flex;
 
-  .highlighted-text-box-backdrop {
+  .commitGraph-filter-text-box-backdrop {
     position: absolute;
     top: 1px;
     bottom: 0;
@@ -28,7 +28,7 @@
     }
   }
 
-  &.with-clear-button .highlighted-text-box-backdrop {
+  &.with-clear-button .commitGraph-filter-text-box-backdrop {
     // right: var(--text-field-height);
     right: calc(16px + var(--spacing-half) + 1px);
   }

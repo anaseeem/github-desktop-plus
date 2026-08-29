@@ -1,22 +1,22 @@
 import * as React from 'react'
-import { FancyTextBox, IFancyTextBoxProps } from './fancy-text-box'
-import { TextBox } from './text-box'
+import { FancyTextBox, IFancyTextBoxProps } from '../lib/fancy-text-box'
+import { TextBox } from '../lib/text-box'
 import classNames from 'classnames'
 import { TAuthorFilterOption } from '../../lib/app-state'
 
-interface IHighlightedTextBoxProps
+interface ICommitGraphFilterTextBoxProps
   extends Omit<IFancyTextBoxProps, 'value' | 'onValueChanged'> {
   readonly authorFilterOptions: ReadonlyArray<TAuthorFilterOption> | null
   readonly onParsedValueChanged: (text: string, emailSet: Set<string>) => void
 }
 
-interface IHighlightedTextBoxState {
+interface ICommitGraphFilterTextBoxState {
   readonly value: string
 }
 
-export class HighlightedTextBox extends React.Component<
-  IHighlightedTextBoxProps,
-  IHighlightedTextBoxState
+export class CommitGraphFilterTextBox extends React.Component<
+  ICommitGraphFilterTextBoxProps,
+  ICommitGraphFilterTextBoxState
 > {
   private backdropRef = React.createRef<HTMLDivElement>()
   private inputElement: HTMLInputElement | null = null
@@ -29,7 +29,7 @@ export class HighlightedTextBox extends React.Component<
     )
   }
 
-  public constructor(props: IHighlightedTextBoxProps) {
+  public constructor(props: ICommitGraphFilterTextBoxProps) {
     super(props)
 
     this.state = { value: '' }
@@ -52,12 +52,12 @@ export class HighlightedTextBox extends React.Component<
 
     return (
       <div
-        className={classNames('highlighted-text-box', {
+        className={classNames('commitGraph-filter-text-box', {
           'with-clear-button': hasClearButton,
         })}
       >
         <div
-          className="highlighted-text-box-backdrop"
+          className="commitGraph-filter-text-box-backdrop"
           aria-hidden="true"
           ref={this.backdropRef}
         >
