@@ -20,7 +20,11 @@
     //    color: var(--box-selected-active-background-color);
     // }
     .token-value {
-      color: var(--box-selected-active-background-color);
+      color: var(--focus-color);
+      background-color: var(--accent-color);
+    }
+    .token-value-invalid {
+      color: yellow;
     }
   }
 

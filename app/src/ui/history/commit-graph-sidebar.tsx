@@ -1,6 +1,7 @@
 import * as React from 'react'
 
 import classNames from 'classnames'
+import debounce from 'lodash/debounce'
 import memoizeOne from 'memoize-one'
 import {
   ICompareState,
@@ -25,7 +26,7 @@ import { Repository } from '../../models/repository'
 import { defaultErrorHandler, Dispatcher } from '../dispatcher'
 import { Button } from '../lib/button'
 import { Checkbox, CheckboxValue } from '../lib/checkbox'
-import { FancyTextBox } from '../lib/fancy-text-box'
+import { HighlightedTextBox } from '../lib/highlighted-text-box'
 import { KeyboardInsertionData } from '../lib/list'
 import { ThrottledScheduler } from '../lib/throttled-scheduler'
 import { startTimer } from '../lib/timing'
@@ -42,7 +43,6 @@ import {
 } from './commit-graph-model'
 import type { ICommitListItemRenderProps } from './commit-list'
 import { CommitList } from './commit-list'
-import debounce from 'lodash/debounce'
 
 type CommitGraphBranchGroup =
   | 'local'
@@ -563,6 +563,8 @@ export class CommitGraphSidebar extends React.Component<
     250
   )
 
+  private authorEmailSet = new Set<string>()
+
   public constructor(props: ICommitGraphSidebarProps) {
     super(props)
 
@@ -587,10 +589,19 @@ export class CommitGraphSidebar extends React.Component<
     void this.props.dispatcher.commitGraph_loadAuthorFilterOptions(
       this.props.repository
     )
+
+    this.syncAuthorEmailSet()
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: ICommitGraphSidebarProps) {
     this.commitGraph_ensureLoaded()
+
+    const prevOptions = prevProps.compareState.commitGraphAuthorFilterOptions
+    const nextOptions = this.props.compareState.commitGraphAuthorFilterOptions
+
+    if (prevOptions !== nextOptions) {
+      this.syncAuthorEmailSet()
+    }
   }
 
   public focusHistory() {
@@ -636,6 +647,14 @@ export class CommitGraphSidebar extends React.Component<
     await this.onCommitSearchFiltersChanged(newFilters)
   }
 
+  private syncAuthorEmailSet = () => {
+    this.authorEmailSet = new Set(
+      (this.props.compareState.commitGraphAuthorFilterOptions ?? []).map(a =>
+        a.email.trim().toLowerCase()
+      )
+    )
+  }
+
   public render() {
     return (
       <div id="compare-view" role="tabpanel" aria-labelledby="history-tab">
@@ -652,7 +671,7 @@ export class CommitGraphSidebar extends React.Component<
                   onActiveAuthorEmailsChange={this.onActiveAuthorEmailsChange}
                 />
               </span>
-              <FancyTextBox
+              <HighlightedTextBox
                 ariaLabel="Commit filter"
                 type="search"
                 symbol={
@@ -660,8 +679,10 @@ export class CommitGraphSidebar extends React.Component<
                 }
                 symbolClassName={this.state.isSearching ? 'spin' : undefined}
                 placeholder={__DARWIN__ ? 'Search Commits' : 'Search commits'}
-                value={this.state.searchQuery}
-                onValueChanged={this.onCommitSearchQueryChanged}
+                authorEmailSet={this.authorEmailSet}
+                onValueOrAuthorChange={
+                  this.onCommitHighlightedSearchQueryChanged
+                }
               />
             </div>
           </div>
@@ -1425,13 +1446,24 @@ export class CommitGraphSidebar extends React.Component<
     })
   }
 
-  private onCommitSearchQueryChanged = async (text: string) => {
-    this.setState({ searchQuery: text })
+  private onCommitHighlightedSearchQueryChanged = async (
+    text: string,
+    emailSet: Set<string>
+  ) => {
+    const newFilters = {
+      ...this.state.filters,
+      author: emailSet,
+    }
+    this.setState({
+      searchQuery: text,
+      filters: newFilters,
+    })
 
-    await this.onCommitQuery(text, this.state.filters)
+    await this.onCommitQuery(text, newFilters)
   }
+
   private onCommitSearchFiltersChanged = async (filters: TFilters) => {
-    await this.onCommitQuery(this.props.compareState.commitSearchQuery, filters)
+    await this.onCommitQuery(this.state.searchQuery, filters)
   }
 
   private onCreateTag = (targetCommitSha: string) => {

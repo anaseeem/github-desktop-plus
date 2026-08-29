@@ -3,26 +3,40 @@ import { FancyTextBox, IFancyTextBoxProps } from './fancy-text-box'
 import { TextBox } from './text-box'
 import classNames from 'classnames'
 
-export class HighlightedTextBox extends React.Component<IFancyTextBoxProps> {
+interface IHighlightedTextBoxProps
+  extends Omit<IFancyTextBoxProps, 'value' | 'onValueChanged'> {
+  readonly authorEmailSet: ReadonlySet<string>
+  readonly onValueOrAuthorChange: (text: string, emailSet: Set<string>) => void
+}
+
+interface IHighlightedTextBoxState {
+  readonly value: string
+}
+
+export class HighlightedTextBox extends React.Component<
+  IHighlightedTextBoxProps,
+  IHighlightedTextBoxState
+> {
   private backdropRef = React.createRef<HTMLDivElement>()
   private inputElement: HTMLInputElement | null = null
+
+  public constructor(props: IHighlightedTextBoxProps) {
+    super(props)
+
+    this.state = { value: '' }
+  }
 
   public componentWillUnmount() {
     this.detachScrollListener()
   }
 
   public componentDidUpdate() {
-    // The input may have adjusted its scroll position after a value
-    // change (e.g. clamping when text got shorter) - make sure the
-    // backdrop still mirrors it.
     this.syncBackdropScroll()
   }
 
   public render() {
-    const value = this.props.value ?? ''
+    const value = this.state.value
 
-    // A clear affordance takes over the right end of the input:
-    // the native ✕ for type="search", or the custom clear button.
     const hasClearButton =
       value !== '' &&
       (this.props.type === 'search' || this.props.displayClearButton === true)
@@ -38,13 +52,35 @@ export class HighlightedTextBox extends React.Component<IFancyTextBoxProps> {
           aria-hidden="true"
           ref={this.backdropRef}
         >
-          {commitGraph_renderSegments(value)}
+          {renderSegments(value, this.props.authorEmailSet)}
           <span></span>
           <span></span>
         </div>
-        <FancyTextBox {...this.props} onRef={this.onTextBoxRef} />
+        <FancyTextBox
+          ariaLabel={this.props.ariaLabel}
+          type={this.props.type}
+          symbol={this.props.symbol}
+          symbolClassName={this.props.symbolClassName}
+          placeholder={this.props.placeholder}
+          value={this.state.value}
+          onValueChanged={this.onValueChanged}
+          onRef={this.onTextBoxRef}
+        />
       </div>
     )
+  }
+
+  private onValueChanged = (text: string) => {
+    this.setState({
+      value: text,
+    })
+
+    const { query, validEmailSet } = parseSearchQuery(
+      text,
+      this.props.authorEmailSet
+    )
+
+    this.props.onValueOrAuthorChange(query, validEmailSet)
   }
 
   private onTextBoxRef = (textBox: TextBox | null) => {
@@ -79,9 +115,8 @@ export class HighlightedTextBox extends React.Component<IFancyTextBoxProps> {
   }
 }
 
-function commitGraph_renderSegments(value: string) {
-  // split on whitespace but KEEP the whitespace segments (needed for spacing)
-  return value
+function renderSegments(text: string, optionSet: ReadonlySet<string>) {
+  return text
     .split(/(\s+)/)
     .filter(s => s.length > 0)
     .map((segment, i) => {
@@ -91,11 +126,35 @@ function commitGraph_renderSegments(value: string) {
         return <span key={i}>{segment}</span>
       }
 
+      const validEmail = optionSet.has(match[1].toLowerCase())
+
       return (
         <span key={i}>
           <span className="token">author:</span>
-          <span className="token-value">{match[1]}</span>
+          <span
+            className={`${validEmail ? 'token-value' : 'token-value-invalid'}`}
+          >
+            {match[1]}
+          </span>
         </span>
       )
     })
+}
+
+function parseSearchQuery(
+  searchQuery: string,
+  authorEmailSet: ReadonlySet<string>
+) {
+  const validEmailSet = new Set<string>()
+  const query = searchQuery
+    .replace(/(?:^|\s)author:(\S+)/g, (_match, email: string) => {
+      if (authorEmailSet.has(email.toLowerCase())) {
+        validEmailSet.add(email.toLowerCase())
+      }
+      return ' '
+    })
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  return { validEmailSet, query }
 }
