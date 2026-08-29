@@ -7,7 +7,7 @@ import { TAuthorFilterOption } from '../../lib/app-state'
 interface ICommitGraphFilterTextBoxProps
   extends Omit<IFancyTextBoxProps, 'value' | 'onValueChanged'> {
   readonly authorFilterOptions: ReadonlyArray<TAuthorFilterOption> | null
-  readonly onParsedValueChanged: (text: string, emailSet: Set<string>) => void
+  readonly onSearchSubmitted: (text: string, emailSet: Set<string>) => void
 }
 
 interface ICommitGraphFilterTextBoxState {
@@ -71,6 +71,7 @@ export class CommitGraphFilterTextBox extends React.Component<
           placeholder={this.props.placeholder}
           value={this.state.value}
           onValueChanged={this.onValueChanged}
+          onEnterPressed={this.onEnterPressed}
           onRef={this.onTextBoxRef}
         />
       </div>
@@ -81,10 +82,12 @@ export class CommitGraphFilterTextBox extends React.Component<
     this.setState({
       value: text,
     })
+  }
 
+  private onEnterPressed = (text: string) => {
     const { query, validEmailSet } = parseSearchQuery(text, this.authorEmailSet)
 
-    this.props.onParsedValueChanged(query, validEmailSet)
+    this.props.onSearchSubmitted(query, validEmailSet)
   }
 
   private onTextBoxRef = (textBox: TextBox | null) => {

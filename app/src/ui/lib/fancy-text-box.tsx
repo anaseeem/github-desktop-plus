@@ -54,6 +54,7 @@ export class FancyTextBox extends React.Component<
           placeholder={this.props.placeholder}
           displayClearButton={this.props.displayClearButton}
           onKeyDown={this.props.onKeyDown}
+          onEnterPressed={this.props.onEnterPressed}
           onValueChanged={this.props.onValueChanged}
           onSearchCleared={this.props.onSearchCleared}
           tabIndex={this.props.tabIndex}

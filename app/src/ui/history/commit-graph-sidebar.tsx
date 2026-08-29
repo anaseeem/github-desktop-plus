@@ -663,7 +663,7 @@ export class CommitGraphSidebar extends React.Component<
                 authorFilterOptions={
                   this.props.compareState.commitGraphAuthorFilterOptions
                 }
-                onParsedValueChanged={this.onCommitHighlightedParseValueChanged}
+                onSearchSubmitted={this.onCommitSearchSubmitted}
               />
             </div>
           </div>
@@ -1427,7 +1427,7 @@ export class CommitGraphSidebar extends React.Component<
     })
   }
 
-  private onCommitHighlightedParseValueChanged = async (
+  private onCommitSearchSubmitted = async (
     text: string,
     emailSet: Set<string>
   ) => {
