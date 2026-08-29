@@ -2,11 +2,12 @@ import * as React from 'react'
 import { FancyTextBox, IFancyTextBoxProps } from './fancy-text-box'
 import { TextBox } from './text-box'
 import classNames from 'classnames'
+import { TAuthorFilterOption } from '../../lib/app-state'
 
 interface IHighlightedTextBoxProps
   extends Omit<IFancyTextBoxProps, 'value' | 'onValueChanged'> {
-  readonly authorEmailSet: ReadonlySet<string>
-  readonly onValueOrAuthorChange: (text: string, emailSet: Set<string>) => void
+  readonly authorFilterOptions: ReadonlyArray<TAuthorFilterOption> | null
+  readonly onParsedValueChanged: (text: string, emailSet: Set<string>) => void
 }
 
 interface IHighlightedTextBoxState {
@@ -19,6 +20,14 @@ export class HighlightedTextBox extends React.Component<
 > {
   private backdropRef = React.createRef<HTMLDivElement>()
   private inputElement: HTMLInputElement | null = null
+
+  private get authorEmailSet() {
+    return new Set(
+      (this.props.authorFilterOptions ?? []).map(a =>
+        a.email.trim().toLowerCase()
+      )
+    )
+  }
 
   public constructor(props: IHighlightedTextBoxProps) {
     super(props)
@@ -52,9 +61,7 @@ export class HighlightedTextBox extends React.Component<
           aria-hidden="true"
           ref={this.backdropRef}
         >
-          {renderSegments(value, this.props.authorEmailSet)}
-          <span></span>
-          <span></span>
+          {renderSegments(value, this.authorEmailSet)}
         </div>
         <FancyTextBox
           ariaLabel={this.props.ariaLabel}
@@ -75,12 +82,9 @@ export class HighlightedTextBox extends React.Component<
       value: text,
     })
 
-    const { query, validEmailSet } = parseSearchQuery(
-      text,
-      this.props.authorEmailSet
-    )
+    const { query, validEmailSet } = parseSearchQuery(text, this.authorEmailSet)
 
-    this.props.onValueOrAuthorChange(query, validEmailSet)
+    this.props.onParsedValueChanged(query, validEmailSet)
   }
 
   private onTextBoxRef = (textBox: TextBox | null) => {

@@ -563,8 +563,6 @@ export class CommitGraphSidebar extends React.Component<
     250
   )
 
-  private authorEmailSet = new Set<string>()
-
   public constructor(props: ICommitGraphSidebarProps) {
     super(props)
 
@@ -589,19 +587,10 @@ export class CommitGraphSidebar extends React.Component<
     void this.props.dispatcher.commitGraph_loadAuthorFilterOptions(
       this.props.repository
     )
-
-    this.syncAuthorEmailSet()
   }
 
-  public componentDidUpdate(prevProps: ICommitGraphSidebarProps) {
+  public componentDidUpdate() {
     this.commitGraph_ensureLoaded()
-
-    const prevOptions = prevProps.compareState.commitGraphAuthorFilterOptions
-    const nextOptions = this.props.compareState.commitGraphAuthorFilterOptions
-
-    if (prevOptions !== nextOptions) {
-      this.syncAuthorEmailSet()
-    }
   }
 
   public focusHistory() {
@@ -647,14 +636,6 @@ export class CommitGraphSidebar extends React.Component<
     await this.onCommitSearchFiltersChanged(newFilters)
   }
 
-  private syncAuthorEmailSet = () => {
-    this.authorEmailSet = new Set(
-      (this.props.compareState.commitGraphAuthorFilterOptions ?? []).map(a =>
-        a.email.trim().toLowerCase()
-      )
-    )
-  }
-
   public render() {
     return (
       <div id="compare-view" role="tabpanel" aria-labelledby="history-tab">
@@ -679,10 +660,10 @@ export class CommitGraphSidebar extends React.Component<
                 }
                 symbolClassName={this.state.isSearching ? 'spin' : undefined}
                 placeholder={__DARWIN__ ? 'Search Commits' : 'Search commits'}
-                authorEmailSet={this.authorEmailSet}
-                onValueOrAuthorChange={
-                  this.onCommitHighlightedSearchQueryChanged
+                authorFilterOptions={
+                  this.props.compareState.commitGraphAuthorFilterOptions
                 }
+                onParsedValueChanged={this.onCommitHighlightedParseValueChanged}
               />
             </div>
           </div>
@@ -1446,18 +1427,18 @@ export class CommitGraphSidebar extends React.Component<
     })
   }
 
-  private onCommitHighlightedSearchQueryChanged = async (
+  private onCommitHighlightedParseValueChanged = async (
     text: string,
     emailSet: Set<string>
   ) => {
+    this.setState({
+      searchQuery: text,
+    })
+
     const newFilters = {
       ...this.state.filters,
       author: emailSet,
     }
-    this.setState({
-      searchQuery: text,
-      filters: newFilters,
-    })
 
     await this.onCommitQuery(text, newFilters)
   }
